@@ -401,7 +401,7 @@ require('lazy').setup({
         pickers = {
           find_files = {
             hidden = true,
-            file_ignore_patterns = { '^%.git/' },
+            file_ignore_patterns = { '^%.git/', '^%.idea/' },
           },
         },
         extensions = {
@@ -486,6 +486,28 @@ require('lazy').setup({
 
       -- Shortcut for searching your Neovim configuration files
       vim.keymap.set('n', '<leader>sn', function() builtin.find_files { cwd = vim.fn.stdpath 'config' } end, { desc = '[S]earch [N]eovim files' })
+
+      -- Search all files including gitignored
+      vim.keymap.set(
+        'n',
+        '<leader>sF',
+        function() builtin.find_files { no_ignore = true, prompt_title = 'Find Files (no ignore)' } end,
+        { desc = '[S]earch all [F]iles (no ignore)' }
+      )
+
+      -- Search vendor/ files (bypasses .gitignore)
+      vim.keymap.set(
+        'n',
+        '<leader>sv',
+        function()
+          builtin.find_files {
+            prompt_title = 'Search Vendor',
+            search_dirs = { 'vendor' },
+            no_ignore = true,
+          }
+        end,
+        { desc = '[S]earch [V]endor' }
+      )
     end,
   },
 
@@ -702,20 +724,20 @@ require('lazy').setup({
         -- have a well standardized coding style. You can add additional
         -- languages here or re-enable it for the disabled ones.
         local disable_filetypes = { c = true, cpp = true }
-        if disable_filetypes[vim.bo[bufnr].filetype] then
-          return nil
-        else
-          return {
-            timeout_ms = 500,
-            lsp_format = 'fallback',
-          }
-        end
+        if disable_filetypes[vim.bo[bufnr].filetype] then return nil end
+        local timeout_ms = vim.bo[bufnr].filetype == 'php' and 3000 or 500
+        return {
+          timeout_ms = timeout_ms,
+          lsp_format = 'fallback',
+        }
       end,
       formatters = {
         pint = {
           command = 'vendor/bin/pint',
-          args = { '--' },
+          args = { '$FILENAME' },
           stdin = false,
+          cwd = function(self, ctx) return require('conform.util').root_file { 'composer.json', 'artisan' }(self, ctx) end,
+          require_cwd = true,
         },
       },
       formatters_by_ft = {
@@ -902,7 +924,7 @@ require('lazy').setup({
     -- [[ Configure Treesitter ]] See `:help nvim-treesitter-intro`
     config = function()
       local parsers = { 'bash', 'c', 'diff', 'html', 'lua', 'luadoc', 'markdown', 'markdown_inline', 'query', 'rust', 'vim', 'vimdoc' }
-      require('nvim-treesitter').setup({ ensure_installed = parsers })
+      require('nvim-treesitter').setup { ensure_installed = parsers }
       vim.api.nvim_create_autocmd('FileType', {
         callback = function(args)
           local buf, filetype = args.buf, args.match
