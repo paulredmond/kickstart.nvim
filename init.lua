@@ -403,6 +403,9 @@ require('lazy').setup({
             hidden = true,
             file_ignore_patterns = { '^%.git/', '^%.idea/' },
           },
+          live_grep = {
+            additional_args = { '--hidden', '--glob=!.git/' },
+          },
         },
         extensions = {
           ['ui-select'] = { require('telescope.themes').get_dropdown() },
@@ -645,12 +648,12 @@ require('lazy').setup({
 
         stylua = {}, -- Used to format Lua code
 
-        phpactor = {
-          init_options = {
-            ['language_server_phpstan.enabled'] = false,
-            ['language_server_psalm.enabled'] = false,
-          },
-        },
+        -- phpactor = {
+        --   init_options = {
+        --     ['language_server_phpstan.enabled'] = false,
+        --     ['language_server_psalm.enabled'] = false,
+        --   },
+        -- },
 
         -- Special Lua Config, as recommended by neovim help docs
         lua_ls = {
@@ -700,6 +703,14 @@ require('lazy').setup({
         vim.lsp.config(name, server)
         vim.lsp.enable(name)
       end
+
+      -- phpantom: manually installed PHP LSP (not managed by Mason)
+      vim.lsp.config('phpantom', {
+        cmd = { 'phpantom_lsp' },
+        filetypes = { 'php' },
+        root_markers = { 'composer.json', '.git' },
+      })
+      vim.lsp.enable 'phpantom'
     end,
   },
 
