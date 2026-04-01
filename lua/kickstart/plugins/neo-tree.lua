@@ -22,6 +22,7 @@ return {
       window = {
         mappings = {
           ['<C-b>'] = 'close_window',
+          ['/'] = { 'fuzzy_finder', config = { keep_filter_on_submit = true } },
         },
       },
     },
