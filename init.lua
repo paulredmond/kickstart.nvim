@@ -713,6 +713,17 @@ require('lazy').setup({
         root_markers = { 'composer.json', '.git' },
       })
       vim.lsp.enable 'phpantom'
+
+      -- laravel_lsp: install with `composer global require laravel/lsp` (not managed by Mason)
+      vim.lsp.config('laravel_lsp', {
+        cmd = { 'laravel-lsp' },
+        filetypes = { 'php', 'blade' },
+        root_markers = { 'artisan', 'composer.json', '.git' },
+        -- Homebrew PHP. Skips the herd/valet/sail/lando/ddev probes that `auto` runs first.
+        -- Use `phpCommand` instead if a project needs container PHP (e.g. `{ './vendor/bin/sail', 'php' }`).
+        init_options = { phpEnvironment = 'local' },
+      })
+      vim.lsp.enable 'laravel_lsp'
     end,
   },
 
